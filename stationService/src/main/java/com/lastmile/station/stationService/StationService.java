@@ -20,8 +20,8 @@ public class StationService extends StationServiceGrpc.StationServiceImplBase {
 
     @Override
     public void getNearbystations(StationName request, StreamObserver<NeabyAreas> responseObserver) {
-        String stationName = request.getName();
-        var nearbyPlacesList = this.redisObj.opsForList().range(stationName,0,-1);
+        String rediskey = "station-service:"+request.getName()+":nearby-places";
+        var nearbyPlacesList = this.redisObj.opsForList().range(rediskey,0,-1);
         NeabyAreas areas = NeabyAreas.newBuilder()
                 .addAllNearbyPlaces(nearbyPlacesList)
                 .build();

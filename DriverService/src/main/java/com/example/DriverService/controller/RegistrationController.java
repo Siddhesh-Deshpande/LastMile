@@ -25,8 +25,12 @@ public class RegistrationController {
     private RedisTemplate<String,Object> redisTemplate;
     @PostMapping("/register-route")
     public ResponseEntity<Map<String,Integer>> registerRoute(@RequestBody RegistrationDTO registrationDTO) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer driverid = (Integer) auth.getDetails();
+        //driverid extracted jwt token
+
+
         System.out.println("Driver ID from auth details: " + driverid);
 
         //We need to save save this route in the db and in the redis persist driver id as key and start location as value so that When the driver location updates we just update that enitty in rediss and we must also update currentlocation in db in case the entry from redis evicts
@@ -47,6 +51,7 @@ public class RegistrationController {
     public ResponseEntity<?> updateLocation(@RequestBody UpdateLocationDTO updateLocationDTO) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer driverid = (Integer) auth.getDetails();
+
         Route r = routeRepository.findByRouteId(updateLocationDTO.getRoute_id());
         r.setCurrent_location(updateLocationDTO.getLocation());
         routeRepository.save(r);//updated in db
@@ -57,7 +62,12 @@ public class RegistrationController {
             data.setCurrentLocation(updateLocationDTO.getLocation());
             redisTemplate.opsForValue().set(redisKey, data);
         }
-
+        else
+        {
+            //if data is null in redis we can create a new entry
+            data = new DriverDataRedis(updateLocationDTO.getLocation(),r.getAvailable_seats(),r.getDestination());
+            redisTemplate.opsForValue().set(redisKey, data);
+        }
         //update the location in redis using the driver id
 
         return ResponseEntity.status(HttpStatus.OK).body("Location Updated Successfully");
