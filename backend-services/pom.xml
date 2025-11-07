@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>backend-services</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Backend Microservices Parent</name>
+    <description>Parent project to manage all microservice modules</description>
+
+    <!-- ✅ List all your microservices here -->
+    <modules>
+        <module>DriverService</module>
+        <module>TripService</module>
+        <module>RiderService</module>
+        <module>UserService</module>
+        <module>stationService</module>
+        <module>kafkaEvents</module>
+        <!-- Add more as needed -->
+    </modules>
+
+    <!-- ✅ Common properties -->
+    <properties>
+        <java.version>21</java.version>
+        <spring.boot.version>3.3.5</spring.boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <!-- ✅ Centralized dependency versions -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ✅ Optional common build configuration -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Spring Boot plugin for all child modules -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+
+                <!-- Compiler plugin for Java 21 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <release>${java.version}</release>
+                    </configuration>
+                </plugin>
+
+                <!-- Optional: clean JAR naming -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
