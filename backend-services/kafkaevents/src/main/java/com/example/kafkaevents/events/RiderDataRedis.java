@@ -1,4 +1,4 @@
-package com.example.RiderService.dtos;
+package com.example.kafkaevents.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

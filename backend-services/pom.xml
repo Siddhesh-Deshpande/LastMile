@@ -19,7 +19,8 @@
         <module>RiderService</module>
         <module>UserService</module>
         <module>stationService</module>
-        <module>kafkaEvents</module>
+        <module>kafkaevents</module>
+        <module>MatchingService</module>
         <!-- Add more as needed -->
     </modules>
 

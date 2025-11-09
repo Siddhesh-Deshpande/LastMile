@@ -1,10 +1,10 @@
 package com.example.TripService.scheduler;
 
 
-import com.example.TripService.dtos.DriverDataRedis;
 import com.example.TripService.entity.Trip;
 import com.example.TripService.repository.TripRepository;
 import com.example.kafkaevents.events.DriverArrived;
+import com.example.kafkaevents.events.DriverDataRedis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;

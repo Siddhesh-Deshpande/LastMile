@@ -1,10 +1,10 @@
 package com.example.DriverService.controller;
 
-import com.example.DriverService.dtos.DriverDataRedis;
 import com.example.DriverService.dtos.RegistrationDTO;
 import com.example.DriverService.dtos.UpdateLocationDTO;
 import com.example.DriverService.entity.Route;
 import com.example.DriverService.repository.RouteRepository;
+import com.example.kafkaevents.events.DriverDataRedis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;

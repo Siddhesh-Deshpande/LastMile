@@ -1,11 +1,11 @@
 package com.example.RiderService.controller;
 
-import com.example.RiderService.config.RedisConfig;
 import com.example.RiderService.dtos.ArrivalRegistrationDTO;
-import com.example.RiderService.dtos.RiderDataRedis;
 import com.example.RiderService.dtos.StatusRequestDTO;
 import com.example.RiderService.entity.Ride;
 import com.example.RiderService.service.RiderService;
+import com.example.kafkaevents.events.DriverArrived;
+import com.example.kafkaevents.events.RiderDataRedis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class RiderRestController {
         Ride r = new Ride(riderid, arrivalRegistrationDTO.getArrivaltime(),arrivalRegistrationDTO.getDestination(), arrivalRegistrationDTO.getArrivalstationname());
         // Logic to save the Ride entity to the database would go here
         Ride databaserideobject = riderService.saveRide(r);
-        String redisKey = "rider-service:driver:" + riderid + ":arrival";
+        String redisKey = "rider-service:rider:" + riderid + ":arrival";
         redisTemplate.opsForValue().set(redisKey,new RiderDataRedis(databaserideobject.getArrivalId(),databaserideobject.getArrivaltime(),databaserideobject.getDestination(),databaserideobject.getArrivalstationname()));
         return ResponseEntity.ok().body("Arrival registered successfully");
     }
