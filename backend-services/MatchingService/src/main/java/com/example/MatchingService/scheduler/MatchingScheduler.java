@@ -1,7 +1,7 @@
 package com.example.MatchingService.scheduler;
 
 import com.example.MatchingService.config.RedisLockManager;
-
+import com.example.MatchingService.service.locationgrpc;
 import com.example.kafkaevents.events.DriverDataRedis;
 import com.example.kafkaevents.events.RiderDataRedis;
 import org.springframework.data.redis.core.Cursor;
@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.UUID;
@@ -23,10 +24,12 @@ public class MatchingScheduler {
     private final String instanceId = UUID.randomUUID().toString(); // unique per instance
     private static final String LOCK_KEY = "locks:job-runner";
     private Integer window_size = 5;
-    public MatchingScheduler (RedisLockManager lockManager, RedisTemplate<String, DriverDataRedis> redisTemplateForDriver, RedisTemplate<String, RiderDataRedis> redisTemplateForRider) {
+    private locationgrpc grpcclient;
+    public MatchingScheduler (RedisLockManager lockManager, RedisTemplate<String, DriverDataRedis> redisTemplateForDriver, RedisTemplate<String, RiderDataRedis> redisTemplateForRider,locationgrpc grpcclient) {
         this.lockManager = lockManager;
         this.redisTemplateForDriver = redisTemplateForDriver;
         this.redisTemplateForRider = redisTemplateForRider;
+        this.grpcclient = grpcclient;
     }
     private <T> HashMap<String,T> getDataFromRedis(String matchkey,RedisTemplate<String,T> redisTemplate)
     {
@@ -52,27 +55,23 @@ public class MatchingScheduler {
     }
     private void match(HashMap<String, DriverDataRedis> driverdata, HashMap<String, RiderDataRedis> riderdata)
     {
-//        for(String dkey: driverdata.keySet())
-//        {
-//            DriverDataRedis driverData = driverdata.get(dkey);
-//            for(String rkey: riderdata.keySet())
-//            {
-//                //Matching Logic
-//                    RiderDataRedis riderData = riderdata.get(rkey);
-//                stationNameAndLocation stationNameAndLoc = stationNameAndLocation.newBuilder()
-//                        .setStationName(riderData.getArrivalstationname())
-//                        .setDriverLocation(driverData.getCurrentLocation())
-//                        .build();
-//                if(driverData.getDestination().equals(riderData.getDestination())
-//                        && driverData.getAvailableSeats()>0
-//                        && Duration.between(LocalDateTime.now(), riderData.getArrivaltime()).toMinutes()<=window_size
-//                        &&
-//
-//
-//
-//                )
-//            }
-//        }
+       for(String dkey: driverdata.keySet())
+       {
+           DriverDataRedis driverData = driverdata.get(dkey);
+           for(String rkey: riderdata.keySet())
+           {
+               //Matching Logic
+                RiderDataRedis riderData = riderdata.get(rkey);
+                if(driverData.getDestination().equals(riderData.getDestination())
+                        && driverData.getAvailableSeats()>0
+                        && Duration.between(LocalDateTime.now(), riderData.getArrivaltime()).toMinutes()<=window_size
+                        && grpcclient.isStationNearby(riderData.getArrivalstationname(),driverData.getCurrentLocation())){
+
+                            
+
+                }
+           }
+       }
     }
     @Scheduled(fixedRate = 5000)//Fix the Time Required
     public void runPeriodicJob() {

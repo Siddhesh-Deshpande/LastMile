@@ -21,6 +21,7 @@
         <module>stationService</module>
         <module>kafkaevents</module>
         <module>MatchingService</module>
+        <module>locationService</module>
         <!-- Add more as needed -->
     </modules>
 

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package locationInfo;
+option java_multiple_files = true;
+option java_package = "com.example.locationService.grpc";
+option java_outer_classname = "locationServiceProto";
+service StationService{
+  rpc checkIfNearby(stationNameAndLocation) returns (isNearby);
+}
+message stationNameAndLocation {
+  string stationName = 1;
+  string DriverLocation = 2;
+}
+message isNearby{
+  bool nearby = 1;
+}
