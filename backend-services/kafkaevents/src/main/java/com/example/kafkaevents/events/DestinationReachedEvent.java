@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotifyPartiesEvent {
+public class DestinationReachedEvent {
     private Integer riderId;
     private Integer driverId;
     private Integer tripId;

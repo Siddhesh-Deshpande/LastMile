@@ -1,4 +1,4 @@
-package com.example.kafkaevents.events;
+package com.example.TripService.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TripCompleted {
-    private Integer riderId;
-    private Integer arrivalId;
+public class RideActiveConfirmationDTO {
+    Integer tripId;
+    Integer arrivalId;
 }

@@ -3,10 +3,7 @@ package com.example.TripService.scheduler;
 
 import com.example.TripService.entity.Trip;
 import com.example.TripService.repository.TripRepository;
-import com.example.kafkaevents.events.DriverArrived;
-import com.example.kafkaevents.events.DriverDataRedis;
-import com.example.kafkaevents.events.TripCompleted;
-import com.example.kafkaevents.events.UpdateStatusEvent;
+import com.example.kafkaevents.events.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -58,10 +55,10 @@ public class TaskScheduler {
                 {
                     for(Trip trip : ongoingTrips)
                     {
-                        kafkaTemplate.send("notification-service",new DriverArrived(trip.getRiderId()));
+                        kafkaTemplate.send("notification-service",new DestinationReachedEvent(trip.getRiderId(),driverid,trip.getTripId()));
                         trip.setStatus("COMPLETED");
                         tripRepository.save(trip);
-                        kafkaTemplate.send("rider-service", new TripCompleted(trip.getRiderId()));
+                        kafkaTemplate.send("rider-service", new TripCompleted(trip.getRiderId(),trip.getArrivalId()));
 
                     }
                 }

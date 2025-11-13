@@ -76,9 +76,7 @@ public class MatchingScheduler {
                         Integer riderId = Integer.parseInt(rkey.split(":")[2]);
                         Integer driverId = Integer.parseInt(dkey.split(":")[2]);
                         kafkaTemplate.send("trip-service", new MatchingEvent(riderId,driverId, riderData.getArrivalId(), riderData.getArrivalstationname()));
-                        redisTemplateForRider.delete(rkey);
-                        kafkaTemplate.send("notification-service",new NotifyPartiesEvent(riderId,driverId));
-                }
+                        redisTemplateForRider.delete(rkey);}
             }
             //For the Drivers with available seats, update Redis so they can be matched again
             if(driverData.getAvailableSeats()>0)

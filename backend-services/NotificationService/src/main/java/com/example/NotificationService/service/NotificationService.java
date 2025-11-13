@@ -1,7 +1,10 @@
 package com.example.NotificationService.service;
 
+import com.example.kafkaevents.events.DestinationReachedEvent;
+import com.example.kafkaevents.events.DriverArrived;
 import com.example.kafkaevents.events.NotifyPartiesEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -13,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 
 @Service
+@KafkaListener(topics = "notification-service")
 public class NotificationService {
 
     private final Map<Integer, SseEmitter> driverEmitters = new ConcurrentHashMap<>();
@@ -55,11 +59,24 @@ public class NotificationService {
             }
         }
     }
-    @KafkaListener(topics = "notification-service")
-    public void listen(NotifyPartiesEvent event, Acknowledgment ack)
+    @KafkaHandler
+    public void NotifyPartiesThatAreMatched(NotifyPartiesEvent event, Acknowledgment ack)
     {
-        sendNotification("rider", event.getRiderId(), "Driver with ID " + event.getDriverId() + " has been assigned to you.");
+        sendNotification("rider", event.getRiderId(), "Driver with ID " + event.getDriverId() + " has been assigned to you.Your Trip id is :"+event.getTripId());
         sendNotification("driver", event.getDriverId(), "You have been assigned to Rider with ID " + event.getRiderId() + ".");
+        ack.acknowledge();
+    }
+    @KafkaHandler
+    public void DriverArrivedForPickup(DriverArrived event, Acknowledgment ack)
+    {
+        sendNotification("rider", event.getRiderId(), "Your driver has arrived for pickup.");
+        ack.acknowledge();
+    }
+    @KafkaHandler
+    public void DestinationReachedNotification(DestinationReachedEvent event, Acknowledgment ack)
+    {
+        sendNotification("rider", event.getRiderId(), "You have reached your destination. Please rate your driver.");
+        sendNotification("driver", event.getDriverId(), "The rider has reached the destination for Trip ID: " + event.getTripId() + ".");
         ack.acknowledge();
     }
 }
