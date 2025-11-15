@@ -1,0 +1,4 @@
+lpush station-service:METROSTATION_SILKBOARD:nearby-places Silkboard hsrlayout btmlayout
+lpush station-service:METROSTATION_ECITY:nearby-places m5 konnapaagrahara neeladrinagar
+lpush station-service:METROSTATION_MGROAD:nearby-places GoodShepherdAuditorium ChurchStreet Ubcitymall
+lrange station-service:METROSTATION_SILKBOARD:nearby-places 0 -1
