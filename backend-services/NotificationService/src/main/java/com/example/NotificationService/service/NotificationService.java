@@ -78,6 +78,7 @@ public class NotificationService {
         sendNotification("rider", event.getRiderId(), "You have reached your destination. Please rate your driver.");
         sendNotification("driver", event.getDriverId(), "The rider has reached the destination for Trip ID: " + event.getTripId() + ".");
         ack.acknowledge();
+        //TODO:Update the notification messages
     }
 }
 
