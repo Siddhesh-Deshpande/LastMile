@@ -14,12 +14,12 @@
 
     <!-- ✅ List all your microservices here -->
     <modules>
+        <module>kafkaevents</module>
         <module>DriverService</module>
         <module>TripService</module>
         <module>RiderService</module>
         <module>UserService</module>
         <module>stationService</module>
-        <module>kafkaevents</module>
         <module>MatchingService</module>
         <module>locationService</module>
         <module>NotificationService</module>
@@ -29,7 +29,7 @@
     <!-- ✅ Common properties -->
     <properties>
         <java.version>21</java.version>
-        <spring.boot.version>3.3.5</spring.boot.version>
+        <spring.boot.version>3.5.7</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -52,10 +52,10 @@
         <pluginManagement>
             <plugins>
                 <!-- Spring Boot plugin for all child modules -->
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
+<!--                <plugin>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--                </plugin>-->
 
                 <!-- Compiler plugin for Java 21 -->
                 <plugin>

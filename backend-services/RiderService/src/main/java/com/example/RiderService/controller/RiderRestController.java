@@ -20,7 +20,7 @@ public class RiderRestController {
     @Autowired
     private RiderService riderService;
     @Autowired
-    @Qualifier("redisTemplate")
+//    @Qualifier("redisTemplate")
     private RedisTemplate<String,Object> redisTemplate;
 
     @PostMapping("/register-arrival")
