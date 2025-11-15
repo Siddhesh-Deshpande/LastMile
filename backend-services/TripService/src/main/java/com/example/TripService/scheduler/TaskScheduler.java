@@ -43,16 +43,20 @@ public class TaskScheduler {
                 DriverDataRedis value = (DriverDataRedis) redisTemplate.opsForValue().get(key);
                 // Business logic
                 Integer driverid = Integer.parseInt(key.split(":")[2]);
-                ArrayList<Trip> ongoingTrips = tripRepository.getOngoingTripsForDriver(driverid, value.getCurrentLocation());
-                if(value.getCurrentLocation().substring(0,12).equals("METROSTATION"))
+
+                if(value.getCurrentLocation().length()>=12 && value.getCurrentLocation().substring(0,12).equals("METROSTATION"))
                 {
-                    for(Trip trip : ongoingTrips)
+                    ArrayList<Trip> scheduledTrips = tripRepository.getScheduledTripsForDriver(driverid, value.getCurrentLocation());
+                    //THis is to get all the trips that are shcheduled for the driver when we reaches some metro stations for pickup.
+                    for(Trip trip : scheduledTrips)
                     {
                         kafkaTemplate.send("notification-service",new DriverArrived(trip.getRiderId()));
                     }
                 }
-                else if(value.getCurrentLocation().substring(0).equals(value.getDestination()))
+                else if(value.getCurrentLocation().equals(value.getDestination()))
                 {
+                    //Get all the trups that are active for this driver
+                    ArrayList<Trip> ongoingTrips = tripRepository.getActiveTripsForDriver(driverid);
                     for(Trip trip : ongoingTrips)
                     {
                         kafkaTemplate.send("notification-service",new DestinationReachedEvent(trip.getRiderId(),driverid,trip.getTripId()));
@@ -61,6 +65,7 @@ public class TaskScheduler {
                         kafkaTemplate.send("rider-service", new TripCompleted(trip.getRiderId(),trip.getArrivalId()));
 
                     }
+                    redisTemplate.delete(key);
                 }
             }
 

@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class TripController {
-    //TODO: Implement trip-related endpoints(For Confirming from rider for trip started basically the next step of scheduled i.e active)
-    // Trip DB chnage status
     //send event to kafka to rider service topic so change the status of ride of a specific arribalid
     @Autowired
     private TripRepository tripRepository;
@@ -31,7 +29,8 @@ public class TripController {
         {
             trip.setStatus("ACTIVE");
             tripRepository.save(trip);
-            kafkaTemplate.send("rider-service",new UpdateStatusEvent(rideActiveConfirmationDTO.getArrivalId(),  "CONFIRMED"));
+            kafkaTemplate.send("rider-service",new UpdateStatusEvent(rideActiveConfirmationDTO.getArrivalId(),  "ACTIVE"));
+            //TODO: Send Driver and Rdier NOtification that trip has been started
             return ResponseEntity.ok("Trip confirmed");
         }
         return ResponseEntity.status(404).body("Trip not found");

@@ -26,7 +26,7 @@ public class NotificationController {
     public SseEmitter stream(@RequestHeader("Authorization") String token) {
         Claims claims = jwtService.extractAllClaims(token);
         String role = claims.get("role", String.class);
-        Integer id = claims.get("id", Integer.class);
+        Integer id = claims.get("driverid", Integer.class);
         return notificationService.addEmitter(role, id);
     }
 }

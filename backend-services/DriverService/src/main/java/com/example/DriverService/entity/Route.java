@@ -3,7 +3,7 @@ package com.example.DriverService.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+//TODO:Rmove the available seats from route and current location also as that is redundant information its only required in redis not here fix it later
 @Entity
 @Table(name="routes")
 @Data

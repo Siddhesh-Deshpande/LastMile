@@ -16,7 +16,7 @@ public class JwtService {
     public Claims extractAllClaims(String token) {
         token = token.replace("Bearer ", ""); // just in case
         return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
+                .setSigningKey(Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(SECRET)))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
