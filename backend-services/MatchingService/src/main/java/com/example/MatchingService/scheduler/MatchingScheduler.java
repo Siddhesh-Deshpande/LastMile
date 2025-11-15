@@ -7,11 +7,13 @@ import com.example.kafkaevents.events.MatchingEvent;
 import com.example.kafkaevents.events.NotifyPartiesEvent;
 import com.example.kafkaevents.events.RiderDataRedis;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,7 +21,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.UUID;
 
-@Service
+@Component("matchingScheduler")
 public class MatchingScheduler {
 
     private RedisLockManager lockManager;
@@ -30,7 +32,7 @@ public class MatchingScheduler {
     private Integer window_size = 5;
     private locationgrpc grpcclient;
     private KafkaTemplate<String,Object> kafkaTemplate;
-    public MatchingScheduler(RedisLockManager lockManager, RedisTemplate<String, DriverDataRedis> redisTemplateForDriver, RedisTemplate<String, RiderDataRedis> redisTemplateForRider, locationgrpc grpcclient, KafkaTemplate<String,Object> kafkaTemplate) {
+    public MatchingScheduler(RedisLockManager lockManager, @Qualifier("driverRedisTemplate")RedisTemplate<String, DriverDataRedis> redisTemplateForDriver, @Qualifier("riderRedisTemplate")RedisTemplate<String, RiderDataRedis> redisTemplateForRider, locationgrpc grpcclient, KafkaTemplate<String,Object> kafkaTemplate) {
         this.lockManager = lockManager;
         this.redisTemplateForDriver = redisTemplateForDriver;
         this.redisTemplateForRider = redisTemplateForRider;
@@ -59,24 +61,26 @@ public class MatchingScheduler {
         return resultMap;
     }
 
-    private void match(HashMap<String, DriverDataRedis> driverdata, HashMap<String, RiderDataRedis> riderdata) {
+    private void match(HashMap<String, DriverDataRedis> driverdata, HashMap<String,RiderDataRedis> riderdata) {
         for (String dkey : driverdata.keySet())
         {
-            DriverDataRedis driverData = driverdata.get(dkey);
+            DriverDataRedis driverData =(DriverDataRedis) driverdata.get(dkey);
             for (String rkey : riderdata.keySet())
             {
                 //Matching Logic
-                RiderDataRedis riderData = riderdata.get(rkey);
+                RiderDataRedis riderData =(RiderDataRedis) riderdata.get(rkey);
                 if (driverData.getDestination().equals(riderData.getDestination())
                         && driverData.getAvailableSeats() > 0
                         && Duration.between(LocalDateTime.now(), riderData.getArrivaltime()).toMinutes() <= window_size
                         && grpcclient.isStationNearby(riderData.getArrivalstationname(), driverData.getCurrentLocation()))
                 {
-                        driverData.setAvailableSeats(driverData.getAvailableSeats() - 1);
-                        Integer riderId = Integer.parseInt(rkey.split(":")[2]);
-                        Integer driverId = Integer.parseInt(dkey.split(":")[2]);
-                        kafkaTemplate.send("trip-service", new MatchingEvent(riderId,driverId, riderData.getArrivalId(), riderData.getArrivalstationname()));
-                        redisTemplateForRider.delete(rkey);}
+                    driverData.setAvailableSeats(driverData.getAvailableSeats() - 1);
+                    Integer riderId = Integer.parseInt(rkey.split(":")[2]);
+                    Integer driverId = Integer.parseInt(dkey.split(":")[2]);
+                    kafkaTemplate.send("trip-service", new MatchingEvent(riderId, driverId, riderData.getArrivalId(), riderData.getArrivalstationname()));
+                    redisTemplateForRider.delete(rkey);
+                    System.out.println("Matching Attempted between Driver: " + dkey + " and Rider: " + rkey);
+                }
             }
             //For the Drivers with available seats, update Redis so they can be matched again
             if(driverData.getAvailableSeats()>0)
@@ -91,8 +95,9 @@ public class MatchingScheduler {
     }
     @Scheduled(fixedDelay = 5000)//Fix the Time Required
     public void runPeriodicJob() {
+        System.out.println("HI from Matching Scheduler");
         HashMap<String, DriverDataRedis> driverdata;
-        HashMap<String, RiderDataRedis> riderdata;
+        HashMap<String,RiderDataRedis> riderdata;
         boolean acquired = lockManager.tryAcquireLock(LOCK_KEY, instanceId, Duration.ofSeconds(10));
         if (!acquired) {
             // Some other instance is running it

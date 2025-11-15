@@ -7,6 +7,7 @@ import com.example.RiderService.service.RiderService;
 import com.example.kafkaevents.events.DriverArrived;
 import com.example.kafkaevents.events.RiderDataRedis;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ public class RiderRestController {
     @Autowired
     private RiderService riderService;
     @Autowired
+    @Qualifier("redisTemplate")
     private RedisTemplate<String,Object> redisTemplate;
 
     @PostMapping("/register-arrival")

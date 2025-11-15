@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.example.locationService.grpc.StationServiceGrpc;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Configuration class for gRPC client setup.
@@ -39,6 +40,7 @@ public class GrpcClientConfig {
      * This will be injected into your client service.
      */
     @Bean
+    @Primary
     public StationServiceGrpc.StationServiceBlockingStub stationServiceStub(ManagedChannel channel) {
         return StationServiceGrpc.newBlockingStub(channel);
     }

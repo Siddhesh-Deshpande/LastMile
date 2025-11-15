@@ -43,7 +43,7 @@ public class RegistrationController {
 
 
         Map<String,Integer> map = new HashMap<>();
-        map.put("ride_id",savedroute.getRouteId());
+        map.put("route_id",savedroute.getRouteId());
         return  ResponseEntity.ok(map);
 
     }

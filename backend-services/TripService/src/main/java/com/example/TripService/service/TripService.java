@@ -22,6 +22,7 @@ public class TripService {
     @KafkaListener(topics="trip-service")
     public void listen(MatchingEvent matchingEvent, Acknowledgment ack)
     {
+        System.out.println("Received Matching Event: " + matchingEvent);
         Trip t = new Trip(matchingEvent.getRiderId(), matchingEvent.getDriverId(), matchingEvent.getArrivalId(), matchingEvent.getArrivalstationname());
         Trip databaseTrip = tripRepository.save(t);
         kafkaTemplate.send("rider-service", new UpdateStatusEvent(matchingEvent.getArrivalId(), "SCHEDULED"));
