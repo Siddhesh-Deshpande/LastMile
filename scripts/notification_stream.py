@@ -1,19 +1,20 @@
-import requests
-from sseclient import SSEClient
+import asyncio
+from aiohttp_sse_client import client as sse_client
 
-url = "http://localhost:8086/notifications/stream"
-role = input("enter the role: ")
-jwt=input("Enter the Jwt Token: ")
-header={
-    "Authorization":f"Bearer {jwt}",
-}
-with requests.get(url, headers=header, stream=True) as response:
-    if response.status_code != 200:
-            print("Failed to connect:", response.status_code)
-            exit(0)
+async def listen_sse(url, jwt, role):
+    headers = {"Authorization": f"Bearer {jwt}"}
+    async with sse_client.EventSource(url, headers=headers) as event_source:
+        async for event in event_source:
+            print(f"[{role}] : {event.data}")
 
-    client = SSEClient(response)
-    for event in client.events():
-        print(f"[{role}] : {event.data}")
+def main():
+    url = "http://localhost:8086/notifications/stream"
+    role = input("Enter the role: ")
+    jwt = input("Enter the Jwt Token: ")
+    asyncio.run(listen_sse(url, jwt, role))
+
+if __name__ == "__main__":
+    main()
+
 
 

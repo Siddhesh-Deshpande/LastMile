@@ -62,7 +62,7 @@ def register_arrival(jwt,dest,station):
         "Authorization": f"Bearer {jwt}",
         # "Content-Type": "application/json"
     }
-    time = (datetime.datetime.now() + datetime.timedelta(minutes=4)).strftime("%Y-%m-%dT%H:%M:%S")
+    time = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=4)).strftime("%Y-%m-%dT%H:%M:%S")
     params = {
         "arrivaltime" : time,
         "destination" : dest,
