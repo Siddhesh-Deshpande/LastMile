@@ -5,6 +5,7 @@ import time
 USERSERVICE = "http://localhost:8081"
 DRIVERSERVICE = "http://localhost:8082"
 RIDERSERVICE = "http://localhost:8082"
+TRIPSERVICE = "http://localhost:8084"
 # register a user
 def register_a_rider_and_driver(rider_name,rider_pass,driver_name,driver_pass):
     url = USERSERVICE + "/users/register"
@@ -14,12 +15,12 @@ def register_a_rider_and_driver(rider_name,rider_pass,driver_name,driver_pass):
         "roles" : ["rider"]
     }
     response = requests.post(url=url,json=params)
-    print(response.content)
+    print(response.text)
     params["username"] = driver_name
     params["password"] = driver_pass
     params["roles"] = ["driver"]
     response = requests.post(url=url,json=params)
-    print(response.content)
+    print(response.text)
 
 def login(rider_name,rider_pass,driver_name,driver_pass):
     url = USERSERVICE + "/users/login"
@@ -49,8 +50,8 @@ def register_route(jwt_token,starting,dest,seats):
         "destination" : dest,
         "available_seats" : seats
     }
-    data = requests.post(url=url,headers=headers,json=params).json()
-    return data.get("route_id")
+    data = requests.post(url=url,headers=headers,json=params)
+    return data.json()["route_id"]
 
 
 def register_arrival(jwt,dest,station):
@@ -59,17 +60,17 @@ def register_arrival(jwt,dest,station):
         "Authorization": f"Bearer {jwt}",
         "Content-Type": "application/json"
     }
-    time = (datetime.datetime.now() + datetime.timedelta(minutes=6)).strftime("%Y-%m-%dT%H:%M:%S")
+    time = (datetime.datetime.now() + datetime.timedelta(minutes=4)).strftime("%Y-%m-%dT%H:%M:%S")
     params = {
         "arrivaltime" : time,
         "destination" : dest,
         "arrivalstationname" : station
     }
-    data = requests.post(url=url,headers=headers,json=params).json()
-    print(data)
+    data = requests.post(url=url,headers=headers,json=params)
+    print(data.text)
 
 def update_loc(jwt,routeid,loc):
-    url = DRIVERSERVICE + "/api/register-route"
+    url = DRIVERSERVICE + "/api/update-location"
     headers = {
         "Authorization": f"Bearer {jwt}",
         "Content-Type": "application/json"
@@ -78,10 +79,21 @@ def update_loc(jwt,routeid,loc):
         "route_id" : routeid,
         "location" : loc
     }
-    data = requests.post(url=url,headers=headers,json=params).json()
-    print(data)
+    data = requests.patch(url=url,headers=headers,json=params)
+    print(data.text)
 
-def confirm_ride(jwt,)
+def confirm_ride(jwt,tripid,arrivalid):
+    url = TRIPSERVICE+"/api/confirmTrip"
+    header={
+        "Authorization":f"Bearer {jwt}",
+        "Content-Type": "application/json"
+    }
+    param = {
+        "tripId" : tripid,
+        "arrivalId" :arrivalid
+    }
+    response = requests.post(url,json=param,headers=header)
+    print(response.text)
 
 dest = "marathalli"
 
@@ -89,5 +101,12 @@ register_a_rider_and_driver("abhi","abhi","sid","sid")
 tokens = login("abhi","abhi","sid","sid")
 route_id = register_route(tokens[1],"electronic_city",dest,4)
 register_arrival(tokens[0],dest,"METROSTATION_SILKBOARD")
+time.sleep(30)
 update_loc(tokens[1],route_id,"hsrlayout")
-time.sleep(60*1)
+time.sleep(30)
+update_loc(tokens[1],route_id,"METROSTATION_SILKBOARD")
+tripId=int(input("Enter TripId: "))
+arrivalId=int(input("Enter ArrivalId: "))
+confirm_ride(tokens[0],tripId,arrivalId)
+time.sleep(30)
+update_loc(tokens[1],route_id,dest)

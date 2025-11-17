@@ -6,8 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.7</version>
-<!--		<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
-        <relativePath>../pom.xml</relativePath>
+		<relativePath/> <!-- lookup parent from repository -->
     </parent>
 	<groupId>com.example</groupId>
 	<artifactId>DriverService</artifactId>
