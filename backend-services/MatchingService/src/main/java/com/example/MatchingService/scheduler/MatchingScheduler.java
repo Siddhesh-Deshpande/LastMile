@@ -6,6 +6,8 @@ import com.example.kafkaevents.events.DriverDataRedis;
 import com.example.kafkaevents.events.MatchingEvent;
 import com.example.kafkaevents.events.NotifyPartiesEvent;
 import com.example.kafkaevents.events.RiderDataRedis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.Cursor;
@@ -32,6 +34,7 @@ public class MatchingScheduler {
     private Integer window_size = 5;
     private locationgrpc grpcclient;
     private KafkaTemplate<String,Object> kafkaTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(MatchingScheduler.class);
     public MatchingScheduler(RedisLockManager lockManager, @Qualifier("driverRedisTemplate")RedisTemplate<String, DriverDataRedis> redisTemplateForDriver, @Qualifier("riderRedisTemplate")RedisTemplate<String, RiderDataRedis> redisTemplateForRider, locationgrpc grpcclient, KafkaTemplate<String,Object> kafkaTemplate) {
         this.lockManager = lockManager;
         this.redisTemplateForDriver = redisTemplateForDriver;
@@ -79,7 +82,7 @@ public class MatchingScheduler {
                     Integer driverId = Integer.parseInt(dkey.split(":")[2]);
                     kafkaTemplate.send("trip-service", new MatchingEvent(riderId, driverId, riderData.getArrivalId(), riderData.getArrivalstationname()));
                     redisTemplateForRider.delete(rkey);
-                    System.out.println("Matching Attempted between Driver: " + dkey + " and Rider: " + rkey);
+                    logger.info("Matched Driver: {} and Rider: {} ",dkey ,rkey);
                 }
             }
             //For the Drivers with available seats, update Redis so they can be matched again
@@ -95,7 +98,7 @@ public class MatchingScheduler {
     }
     @Scheduled(fixedDelay = 5000)//Fix the Time Required
     public void runPeriodicJob() {
-        System.out.println("HI from Matching Scheduler");
+//        System.out.println("HI from Matching Scheduler");
         HashMap<String, DriverDataRedis> driverdata;
         HashMap<String,RiderDataRedis> riderdata;
         boolean acquired = lockManager.tryAcquireLock(LOCK_KEY, instanceId, Duration.ofSeconds(10));

@@ -4,6 +4,8 @@ import com.example.TripService.dtos.RideActiveConfirmationDTO;
 import com.example.TripService.entity.Trip;
 import com.example.TripService.repository.TripRepository;
 import com.example.kafkaevents.events.UpdateStatusEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -20,7 +22,7 @@ public class TripController {
     private TripRepository tripRepository;
     @Autowired
     private KafkaTemplate<String,Object> kafkaTemplate;
-
+    private static final Logger logger = LoggerFactory.getLogger(TripController.class);
     @PostMapping("/confirmTrip")
     public ResponseEntity<?> confirmTrip(@RequestBody RideActiveConfirmationDTO rideActiveConfirmationDTO) {
         Integer tripId = rideActiveConfirmationDTO.getTripId();
@@ -30,6 +32,7 @@ public class TripController {
             trip.setStatus("ACTIVE");
             tripRepository.save(trip);
             kafkaTemplate.send("rider-service",new UpdateStatusEvent(rideActiveConfirmationDTO.getArrivalId(),  "ACTIVE"));
+            logger.info("Trip with id {} has been confirmed and status updated to ACTIVE", tripId);
             //TODO: Send Driver and Rdier NOtification that trip has been started
             return ResponseEntity.ok("Trip confirmed");
         }

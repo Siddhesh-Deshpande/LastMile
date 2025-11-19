@@ -4,6 +4,8 @@ import com.example.RiderService.entity.Ride;
 import com.example.RiderService.repository.RiderRepository;
 import com.example.kafkaevents.events.TripCompleted;
 import com.example.kafkaevents.events.UpdateStatusEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -21,7 +23,7 @@ public class RiderService {
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
 
-
+    private static final Logger logger = LoggerFactory.getLogger(RiderService.class);
     public Ride saveRide(Ride ride) {
         return riderRepository.save(ride);
     }
@@ -33,10 +35,12 @@ public class RiderService {
     public void handleTripCompletion(TripCompleted tripCompleted, Acknowledgment ack)
     {
         Ride ride = riderRepository.findById(tripCompleted.getArrivalId()).orElse(null);
+
         if(ride != null)
         {
             ride.setStatus("COMPLETED");
             riderRepository.save(ride);
+            logger.info("Ride with ArrivalID {} marked as COMPLETED", ride.getArrivalId());
         }
         ack.acknowledge();
 
@@ -49,6 +53,7 @@ public class RiderService {
         {
             ride.setStatus(updateStatusEvent.getStatus());
             riderRepository.save(ride);
+            logger.info("Ride with ArrivalID {} status updated to {}", ride.getArrivalId(), updateStatusEvent.getStatus());
         }
         ack.acknowledge();
     }

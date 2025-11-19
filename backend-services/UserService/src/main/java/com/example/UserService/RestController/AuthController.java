@@ -4,12 +4,15 @@ import com.example.UserService.entity.User;
 import com.example.UserService.Repository.UserRepository;
 import com.example.UserService.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,7 +25,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     // ✅ REGISTER endpoint
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -33,6 +36,7 @@ public class AuthController {
         // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        logger.info("User with ID: {} and Username: {} registered with roles:{}" ,user.getDriverid() ,user.getUsername(), Arrays.toString(user.getRoles()));
         return ResponseEntity.ok("User registered successfully!");
     }
 
@@ -70,7 +74,7 @@ public class AuthController {
 
         // Generate JWT with the selected role
         String token = jwtTokenProvider.generateToken(username, role, user.getDriverid());
-
+        logger.info("User with ID: {} and Username: {} logged in with role: {}" ,user.getDriverid() ,user.getUsername(), role);
         return ResponseEntity.ok(Map.of(
                 "username", username,
                 "role", role,

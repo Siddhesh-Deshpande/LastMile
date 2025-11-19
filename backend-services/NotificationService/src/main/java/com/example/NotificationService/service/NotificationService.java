@@ -1,8 +1,11 @@
 package com.example.NotificationService.service;
 
+import com.example.NotificationService.controller.NotificationController;
 import com.example.kafkaevents.events.DestinationReachedEvent;
 import com.example.kafkaevents.events.DriverArrived;
 import com.example.kafkaevents.events.NotifyPartiesEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,7 +24,7 @@ public class NotificationService {
 
     private final Map<Integer, SseEmitter> driverEmitters = new ConcurrentHashMap<>();
     private final Map<Integer, SseEmitter> riderEmitters = new ConcurrentHashMap<>();
-
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
     public SseEmitter addEmitter(String role, Integer id) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
@@ -64,12 +67,14 @@ public class NotificationService {
     {
         sendNotification("rider", event.getRiderId(), "Driver with ID " + event.getDriverId() + " has been assigned to you.Your Trip id is :"+event.getTripId() +" and your arrival id is :"+ event.getArrivalId());
         sendNotification("driver", event.getDriverId(), "You have been assigned to Rider with ID " + event.getRiderId() + "."+" Go to Metro Station: "+event.getArrivalstationname());
+        logger.info("Notifications regarding matching sent to Rider ID: {} and Driver ID: {}", event.getRiderId(), event.getDriverId());
         ack.acknowledge();
     }
     @KafkaHandler
     public void DriverArrivedForPickup(DriverArrived event, Acknowledgment ack)
     {
         sendNotification("rider", event.getRiderId(), "Your driver has arrived for pickup.");
+        logger.info("Notification sent to Rider ID: {} about driver arrival.", event.getRiderId());
         ack.acknowledge();
     }
     @KafkaHandler
@@ -77,6 +82,7 @@ public class NotificationService {
     {
         sendNotification("rider", event.getRiderId(), "You have reached your destination. Please rate your driver.");
         sendNotification("driver", event.getDriverId(), "The rider has reached the destination for Trip ID: " + event.getTripId() + ".");
+        logger.info("Destination reached notifications sent to Rider ID: {} and Driver ID: {}", event.getRiderId(), event.getDriverId());
         ack.acknowledge();
         //TODO:Update the notification messages
     }

@@ -4,6 +4,8 @@ package com.example.TripService.scheduler;
 import com.example.TripService.entity.Trip;
 import com.example.TripService.repository.TripRepository;
 import com.example.kafkaevents.events.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +27,7 @@ public class TaskScheduler {
 
     @Autowired
     private TripRepository tripRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(TaskScheduler.class);
     @Scheduled(fixedDelay = 10000)//rus every 10 seconds
     //TODO I need to set the delay time
     public void manageTrips() {
@@ -51,6 +53,7 @@ public class TaskScheduler {
                     for(Trip trip : scheduledTrips)
                     {
                         kafkaTemplate.send("notification-service",new DriverArrived(trip.getRiderId()));
+                        logger.info("Driver arrived event sent for riderId: " + trip.getRiderId());
                     }
                 }
                 else if(value.getCurrentLocation().equals(value.getDestination()))
@@ -63,6 +66,7 @@ public class TaskScheduler {
                         trip.setStatus("COMPLETED");
                         tripRepository.save(trip);
                         kafkaTemplate.send("rider-service", new TripCompleted(trip.getRiderId(),trip.getArrivalId()));
+                        logger.info("Destination reached event sent for riderId: " + trip.getRiderId());
 
                     }
                     redisTemplate.delete(key);

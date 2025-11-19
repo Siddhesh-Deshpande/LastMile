@@ -1,5 +1,7 @@
 package com.example.locationService.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.grpc.server.service.GrpcService;
 
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 public class LocationService extends StationServiceImplBase{
     @Autowired
     private stationServiceGrpcClient SSclient;
-
+    private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
     @Override
     public void checkIfNearby(stationNameAndLocation request,StreamObserver<isNearby> responseObserver){
         String stationNameStr = request.getStationName();
@@ -28,6 +30,7 @@ public class LocationService extends StationServiceImplBase{
         isNearby retval = isNearby.newBuilder()
             .setNearby(ifNearby)
             .build();
+        logger.info("{} is nearby {} : {}",driverCurrLoc,stationNameStr,ifNearby);
         responseObserver.onNext(retval);
         responseObserver.onCompleted();
     }

@@ -6,6 +6,8 @@ import com.example.RiderService.entity.Ride;
 import com.example.RiderService.service.RiderService;
 import com.example.kafkaevents.events.DriverArrived;
 import com.example.kafkaevents.events.RiderDataRedis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +24,7 @@ public class RiderRestController {
     @Autowired
 //    @Qualifier("redisTemplate")
     private RedisTemplate<String,Object> redisTemplate;
-
+    private static final Logger logger = LoggerFactory.getLogger(RiderRestController.class);
     @PostMapping("/register-arrival")
     public ResponseEntity<?> RegisterArrival(@RequestBody ArrivalRegistrationDTO arrivalRegistrationDTO) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -32,6 +34,7 @@ public class RiderRestController {
         Ride databaserideobject = riderService.saveRide(r);
         String redisKey = "rider-service:rider:" + riderid + ":arrival";
         redisTemplate.opsForValue().set(redisKey,new RiderDataRedis(databaserideobject.getArrivalId(),databaserideobject.getArrivaltime(),databaserideobject.getDestination(),databaserideobject.getArrivalstationname()));
+        logger.info("arrival Registered for rider id: {}" , riderid);
         return ResponseEntity.ok().body("Arrival registered successfully");
     }
     @GetMapping("/ride-status")
