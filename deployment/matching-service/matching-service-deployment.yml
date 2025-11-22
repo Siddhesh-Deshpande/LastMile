@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matching-deployment
+  namespace: lastmile
+  labels:
+    app: matching-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matching-service
+  template:
+    metadata:
+      labels:
+        app: matching-service
+    spec:
+      containers:
+        - name: matching-service
+          image: siddhesh1712/matching-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GRPC_SERVER_HOST
+              value: location-service
+            - name: GRPC_SERVER_PORT
+              value: "9095"
+            - name : SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-service:9092
+
+            - name: SPRING_REDIS_HOST
+              value: redis-service
+
+            - name: SPRING_REDIS_PORT
+              value: "6379"
+
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

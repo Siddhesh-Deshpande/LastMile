@@ -1,49 +1,4 @@
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.0
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ports:
-      - "9200:9200"
-    networks:
-      - app-network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:9.2.0
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - app-network
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:9.2.0
-    container_name: logstash
-    ports:
-      - "5044:5044"
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - elasticsearch
-    networks:
-      - app-network
-
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:9.2.0
-    container_name: filebeat
-    user: root
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - app-logs:/logs:ro  # Changed: mount shared volume as read-only
-    depends_on:
-      - logstash
-    networks:
-      - app-network
-
   postgres:
     image: postgres:18
     container_name: postgres-multi-db
@@ -91,7 +46,7 @@ services:
     container_name: redis-db
     networks:
     - app-network
-      
+
   driver-service:
     build:
       context: ./DriverService
@@ -102,18 +57,14 @@ services:
       - postgres
       - kafka
       - redis
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/lastmile_driverservice
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/driver-service.log
     networks:
       - app-network
-    image:
-      siddhesh1712/driver-service:latest
 
   location-service:
     build:
@@ -130,14 +81,10 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/location-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
     networks:
       - app-network
-    image:
-      siddhesh1712/location-service:latest
-  
+
   matching-service:
     build:
       context: ./MatchingService
@@ -153,13 +100,9 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/matching-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
     networks:
       - app-network
-    image:
-      siddhesh1712/matching-service:latest
 
   notification-service:
     build:
@@ -175,14 +118,10 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/notification-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
     networks:
       - app-network
-    image:
-      siddhesh1712/notification-service:latest
-  
+
   rider-service:
     build:
       context: ./RiderService
@@ -198,13 +137,10 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/rider-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
+
     networks:
       - app-network
-    image:
-      siddhesh1712/rider-service:latest
 
   station-service:
     build:
@@ -220,9 +156,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     networks:
       - app-network
-    image:
-      siddhesh1712/station-service:latest
-  
+
   trip-service:
     build:
       context: ./TripService
@@ -238,13 +172,8 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/trip-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
     networks:
       - app-network
-    image:
-      siddhesh1712/trip-service:latest
 
   user-service:
     build:
@@ -261,17 +190,13 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - LOGGING_FILE_NAME=/logs/user-service.log
-    volumes:
-      - app-logs:/logs  # Added: mount shared volume
+
+
     networks:
       - app-network
-    image:
-      siddhesh1712/user-service:latest
 
 volumes:
   postgres_data:
-  app-logs:  # Added: shared logs volume
 
 networks:
   app-network:

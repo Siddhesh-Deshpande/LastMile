@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driver-deployment
+  namespace: lastmile
+  labels:
+    app: driver-service
+spec:
+  replicas: 1   # HPA will overwrite this when scaling
+  selector:
+    matchLabels:
+      app: driver-service
+  template:
+    metadata:
+      labels:
+        app: driver-service
+    spec:
+      containers:
+        - name: driver-service
+          image: siddhesh1712/driver-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+
+          # Spring Boot ENV Variables
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/driver_db
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: SPRING_REDIS_HOST
+              value: redis-service
+            - name: SPRING_REDIS_PORT
+              value: "6379"
+
+          # Resource requests needed for HPA
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

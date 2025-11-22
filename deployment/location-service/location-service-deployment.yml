@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: location-deployment
+    labels:
+        app: location-service
+    namespace: lastmile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: location-service
+  template:
+    metadata:
+      labels:
+        app: location-service
+    spec:
+      containers:
+        - name: location-service
+          image: siddhesh1712/location-service:latest
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: GRPC_SERVER_HOST
+              value: station-service
+
+            - name: GRPC_SERVER_PORT
+              value: "9091"
+
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+
+

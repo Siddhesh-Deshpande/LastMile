@@ -1,33 +1,16 @@
 <configuration>
 
-    <!-- ========== FILE APPENDER (only your logs) ========== -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>locationService/logs/application.json</file>
-
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>locationService/logs/application-%d{yyyy-MM-dd}.json</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-    </appender>
-
-    <!-- ========== CONSOLE APPENDER (show EVERYTHING in terminal) ========== -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
-        </encoder>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <!-- ========== Only your package logs go to FILE ========== -->
-    <logger name="com.example.locationService.service.LocationService" level="INFO" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/> <!-- your logs also visible in terminal -->
+    <!-- ONLY your logs -->
+    <logger name="com.example.locationService" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <!-- ========== Root logger sends EVERYTHING to console only ========== -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+    <!-- Turn off all Spring Boot logs -->
+    <root level="OFF">
     </root>
 
 </configuration>
