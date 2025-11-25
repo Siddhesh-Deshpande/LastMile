@@ -14,5 +14,5 @@ data:
               in_cluster: true
     
     output.logstash:
-      hosts: ["logstash.logging.svc.cluster.local:5044"]
+      hosts: ["logstash.lastmile.svc.cluster.local:5044"]
       

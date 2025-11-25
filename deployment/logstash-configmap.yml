@@ -24,7 +24,7 @@ data:
     
     output {
       elasticsearch {
-        hosts => ["http://elasticsearch:9200"]
+        hosts => ["elasticsearch-service.lastmile.svc.cluster.local:9200"]
         index => "k8s-logs-%{+YYYY.MM.dd}"
       }
       stdout { codec => rubydebug }
