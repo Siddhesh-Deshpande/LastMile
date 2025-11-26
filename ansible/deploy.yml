@@ -1,0 +1,16 @@
+- name: Deploy to Minikube
+  hosts: kubehosts
+
+  vars:
+    deployments_dir: "../deployment"
+
+  tasks:
+
+    - name: Start Minikube
+      shell: minikube start --driver=docker --cpus=4 --memory=6gb
+      register: minikube_output
+    - debug:
+        var: minikube_output.stdout
+
+    - name: deploy using kubectl
+      shell: kubectl apply -R -f {{ deployments_dir }}
