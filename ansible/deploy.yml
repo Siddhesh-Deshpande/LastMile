@@ -3,14 +3,19 @@
 
   vars:
     deployments_dir: "../deployment"
+    minikube_driver: "docker"
+    minikube_cpu: "4"
+    minikube_memory: "6gb"
 
   tasks:
-
+    - name: Check if Minikube is already running
+      shell: "minikube status --format '{{'{{.Host}}'}}'"
+      register: minikube_status
+      ignore_errors: true
+    
     - name: Start Minikube
-      shell: minikube start --driver=docker --cpus=4 --memory=6gb
-      register: minikube_output
-    - debug:
-        var: minikube_output.stdout
+      shell: minikube start --driver={{ minikube_driver }} --cpus={{ minikube_cpu }} --memory={{ minikube_memory }}
+      when: minikube_status.stdout != "Running"
 
     - name: deploy using kubectl
       shell: kubectl apply -R -f {{ deployments_dir }}
