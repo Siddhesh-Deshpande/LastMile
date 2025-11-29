@@ -3,9 +3,6 @@ pipeline{
     triggers{
         githubPush()
     }
-    tools{
-        maven '3.8.7'
-    }
     environment{
         EMAIL_ID = "siddhesh17122004@gmail.com"
     }
@@ -18,7 +15,7 @@ pipeline{
         stage('Build'){
             steps{
                 dir('backend-services'){
-                    sh 'mvn clean install -DskipTests'
+                    sh './mvnw clean install -DskipTests'
                 }
             }
         }
