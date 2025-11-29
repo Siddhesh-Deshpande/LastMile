@@ -1,5 +1,27 @@
+#- name: Deploy to Minikube
+#  hosts: kubehosts
+#  vars:
+#    deployments_dir: "../deployment"
+#    minikube_driver: "docker"
+#    minikube_cpu: "4"
+#    minikube_memory: "6gb"
+#
+#  tasks:
+#    - name: Check if Minikube is already running
+#      shell: "minikube status --format '{{'{{.Host}}'}}'"
+#      register: minikube_status
+#      ignore_errors: true
+#
+#    - name: Start Minikube
+#      shell: minikube start --driver={{ minikube_driver }} --cpus={{ minikube_cpu }} --memory={{ minikube_memory }}
+#      when: minikube_status.stdout != "Running"
+#
+#    - name: deploy using kubectl
+#      shell: kubectl apply -R -f {{ deployments_dir }}
+
 - name: Deploy to Minikube
   hosts: kubehosts
+  become: false  # <--- FIX 1: Do not execute as root (sudo) by default
 
   vars:
     deployments_dir: "../deployment"
@@ -8,14 +30,34 @@
     minikube_memory: "6gb"
 
   tasks:
+    # ---------------------------------------------------------
+    # OPTIONAL: Clean up the broken state from your failed run.
+    # Run this ONCE or uncomment if you want a fresh start every time.
+    # ---------------------------------------------------------
+    # - name: Delete broken minikube instance
+    #   shell: minikube delete --all
+    #   ignore_errors: true
+
     - name: Check if Minikube is already running
       shell: "minikube status --format '{{'{{.Host}}'}}'"
       register: minikube_status
       ignore_errors: true
-    
-    - name: Start Minikube
-      shell: minikube start --driver={{ minikube_driver }} --cpus={{ minikube_cpu }} --memory={{ minikube_memory }}
-      when: minikube_status.stdout != "Running"
+      changed_when: false
 
-    - name: deploy using kubectl
-      shell: kubectl apply -R -f {{ deployments_dir }}
+    - name: Start Minikube
+      shell: >
+        minikube start 
+        --driver={{ minikube_driver }} 
+        --cpus={{ minikube_cpu }} 
+        --memory={{ minikube_memory }}
+        --force
+      when: minikube_status.stdout != "Running"
+      # FIX 2: Added --force above.
+      # Since Jenkins/Ansible often run in root-like environments,
+      # this bypasses the "Do not run as root" error.
+
+    - name: Deploy using Minikube kubectl wrapper
+      shell: minikube kubectl -- apply -R -f {{ deployments_dir }}
+      # FIX 3: Use 'minikube kubectl --' instead of just 'kubectl'.
+      # This ensures you are using the kubectl configured for THIS minikube
+      # instance, avoiding path or permission issues in Jenkins.
