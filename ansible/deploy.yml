@@ -3,8 +3,8 @@
   vars:
     deployments_dir: "../deployment"
     minikube_driver: "docker"
-    minikube_cpu: "4"
-    minikube_memory: "6gb"
+    minikube_cpu: "6"
+    minikube_memory: "8gb"
 
   tasks:
     - name: Check if Minikube is already running
