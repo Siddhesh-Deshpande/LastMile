@@ -15,6 +15,9 @@
     - name: Start Minikube
       shell: minikube start --driver={{ minikube_driver }} --cpus={{ minikube_cpu }} --memory={{ minikube_memory }}
       when: minikube_status.stdout != "Running"
+    
+    - name: enable ingress in minikube
+      shell: minikube addons enable ingress
 
     - name: deploy using kubectl
       shell: kubectl apply -R -f {{ deployments_dir }}
