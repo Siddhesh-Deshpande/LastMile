@@ -2,6 +2,8 @@ import requests
 import datetime
 import time
 
+
+INGRESS_PORT = 80
 def register(user_name : str,user_pass : str,roles : list[str],url : str):
     params = {
         "username" : user_name,
@@ -32,7 +34,7 @@ def login_both(rider_name : str,rider_pass : str,driver_name : str,driver_pass :
     return (rider_jwt,driver_jwt)
     
 
-def register_route(jwt_token : str,starting : str,dest,seats : int,url : str) -> int:
+def register_route(jwt_token : str,starting : str,dest,seats : int,vehicle_no : str,url : str) -> int:
     headers = {
         "Authorization": f"Bearer {jwt_token}",
         "Content-Type": "application/json"
@@ -40,7 +42,8 @@ def register_route(jwt_token : str,starting : str,dest,seats : int,url : str) ->
     params = {
         "startinglocation" : starting,
         "destination" : dest,
-        "available_seats" : seats
+        "available_seats" : seats,
+        "vehiclenumber" : vehicle_no
     }
     data = requests.post(url=url,headers=headers,json=params)
     routeId = data.json()["route_id"]
@@ -93,28 +96,22 @@ def main():
     driver_pass = "siddhesh"
     destination = "marathalli"
     station = "METROSTATION_SILKBOARD"
+    vehicle_num = "MH 02 4405"
     #inputs
     minikube_ip = input("enter ip of minikube : ").strip()
-    user_port = int(input("enter port of user-service : "))
-    rider_port = int(input("enter port of rider-service : "))
-    driver_port = int(input("enter port of driver-service : "))
-    trip_port = int(input("enter port of trip-service : "))
     #hosts
-    user_service_host = f"http://{minikube_ip}:{user_port}"
-    rider_service_host = f"http://{minikube_ip}:{rider_port}"
-    driver_service_host = f"http://{minikube_ip}:{driver_port}"
-    trip_service_host = f"http://{minikube_ip}:{trip_port}"
+    ingress_host = f"http://{minikube_ip}:{INGRESS_PORT}"
     #urls
-    url_register = user_service_host + "/users/register"
-    url_login = user_service_host + "/users/login"
-    route_url = driver_service_host + "/api/register-route"
-    url_arrival = rider_service_host + "/api/register-arrival"
-    update_loc_url = driver_service_host + "/api/update-location"
-    conf_trip_url = trip_service_host + "/api/confirmTrip"
+    url_register = ingress_host + "/users/register"
+    url_login = ingress_host + "/users/login"
+    route_url = ingress_host + "/api/register-route"
+    url_arrival = ingress_host + "/api/register-arrival"
+    update_loc_url = ingress_host + "/api/update-location"
+    conf_trip_url = ingress_host + "/api/confirmTrip"
 
     register_both(rider_name,rider_pass,driver_name,driver_pass,url_register)
     rider_jwt, driver_jwt = login_both(rider_name,rider_pass,driver_name,driver_pass,url_login)
-    route_id = register_route(driver_jwt,"electropnic_city",destination,4,route_url)
+    route_id = register_route(driver_jwt,"electropnic_city",destination,4,vehicle_num,route_url)
     register_arrival(rider_jwt,destination,station,url_arrival)
     time.sleep(30)
     update_loc(driver_jwt,route_id,"hsrlayout",update_loc_url)

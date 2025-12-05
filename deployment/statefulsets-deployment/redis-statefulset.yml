@@ -54,22 +54,39 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: [ "/bin/sh", "/init/init.sh" ]
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    echo "Waiting for Redis to start..."
+                    until redis-cli -h 127.0.0.1 -p 6379 ping; do
+                      sleep 2;
+                    done
+
+                    echo "Redis ready. Initializing data..."
+
+                    redis-cli <<EOF
+                    LPUSH station-service:METROSTATION_SILKBOARD:nearby-places Silkboard hsrlayout btmlayout
+                    LPUSH station-service:METROSTATION_ECITY:nearby-places m5 konnapaagrahara neeladrinagar
+                    LPUSH station-service:METROSTATION_MGROAD:nearby-places GoodShepherdAuditorium ChurchStreet Ubcitymall
+                    EOF
+
+                    echo "Initialization complete!"
       volumes:
         - name: redis-data
           persistentVolumeClaim:
             claimName: redis-data
-        - name: init-script
-          configMap:
-            name: redis-initdb
-            defaultMode: 0755
-      initContainers:
-        - name: redis-init
-          image: redis:8.2.2-alpine
-          command: [ "/bin/sh", "-c", "sleep 10 && /init/init.sh" ]
-          volumeMounts:
-            - name: init-script
-              mountPath: /init
+        # - name: init-script
+        #   configMap:
+        #     name: redis-initdb
+        #     defaultMode: 0755
+      # initContainers:
+      #   - name: redis-init
+      #     image: redis:8.2.2-alpine
+      #     command: [ "/bin/sh", "-c", "sleep 10 && /init/init.sh" ]
+      #     volumeMounts:
+      #       - name: init-script
+      #         mountPath: /init
   volumeClaimTemplates:
     - metadata:
         name: redis-data

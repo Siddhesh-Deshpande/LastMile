@@ -1,5 +1,6 @@
 import asyncio
 from aiohttp_sse_client import client as sse_client
+INGRESS_PORT = 80
 #Testing Pipeline 2
 async def listen_sse(url : str, jwt : str, role : str):
     headers = {"Authorization": f"Bearer {jwt}"}
@@ -9,9 +10,8 @@ async def listen_sse(url : str, jwt : str, role : str):
 
 def main():
     minkube_ip = input("enter minikube ip : ").strip()
-    notification_port = int(input("enter port of notification service : "))
     
-    url = f"http://{minkube_ip}:{notification_port}/notifications/stream"
+    url = f"http://{minkube_ip}:{INGRESS_PORT}/notifications/stream"
     role = input("Enter the role: ").strip()
     jwt = input("Enter the Jwt Token: ").strip()
     asyncio.run(listen_sse(url, jwt, role))
