@@ -19,20 +19,9 @@
     - name: enable ingress in minikube
       shell: minikube addons enable ingress
 
-    - name: Wait for ingress-nginx controller to be ready
-      shell: |
-        kubectl wait --namespace ingress-nginx \
-          --for=condition=Available deployment/ingress-nginx-controller \
-          --timeout=120s
-      register: ingress_ready
-      until: ingress_ready.rc == 0
-      retries: 5
-      delay: 5
-    - name: Wait for ingress admission patch job
-      shell: |
-        kubectl wait --namespace ingress-nginx \
-          --for=condition=Complete job/ingress-nginx-admission-patch \
-          --timeout=120s || true
+    - name: wait for ingress to start
+      pause:
+        seconds: 60
     - name: deploy using kubectl
       shell: kubectl apply -R -f {{ deployments_dir }}
 
