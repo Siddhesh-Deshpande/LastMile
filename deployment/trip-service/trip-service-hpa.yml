@@ -10,6 +10,9 @@ spec:
     name: trip-deployment
   minReplicas: 1
   maxReplicas: 5
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 30
   metrics:
     - type: Resource
       resource:
