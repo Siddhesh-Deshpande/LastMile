@@ -4,6 +4,7 @@ import com.example.NotificationService.controller.NotificationController;
 import com.example.kafkaevents.events.DestinationReachedEvent;
 import com.example.kafkaevents.events.DriverArrived;
 import com.example.kafkaevents.events.NotifyPartiesEvent;
+import com.example.kafkaevents.events.TripConfirmedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,14 @@ public class NotificationService {
     {
         sendNotification("rider", event.getRiderId(), "Your driver has arrived for pickup.");
         logger.info("Notification sent to Rider ID: {} about driver arrival.", event.getRiderId());
+        ack.acknowledge();
+    }
+    @KafkaHandler
+    public void RideStartedNotification(TripConfirmedEvent event, Acknowledgment ack)
+    {
+        sendNotification("rider", event.getRiderId(), "Your trip has started. Enjoy your ride!");
+        sendNotification("driver", event.getDriverId(), "The trip has started. Drive safely!");
+        logger.info("Trip Confirmation Send to Rider ID: {} and Driver ID: {}", event.getRiderId(), event.getDriverId());
         ack.acknowledge();
     }
     @KafkaHandler

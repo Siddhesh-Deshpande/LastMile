@@ -3,6 +3,7 @@ package com.example.TripService.controller;
 import com.example.TripService.dtos.RideActiveConfirmationDTO;
 import com.example.TripService.entity.Trip;
 import com.example.TripService.repository.TripRepository;
+import com.example.kafkaevents.events.TripConfirmedEvent;
 import com.example.kafkaevents.events.UpdateStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class TripController {
             tripRepository.save(trip);
             kafkaTemplate.send("rider-service",new UpdateStatusEvent(rideActiveConfirmationDTO.getArrivalId(),  "ACTIVE"));
             logger.info("Trip with id {} has been confirmed and status updated to ACTIVE", tripId);
-            //TODO: Send Driver and Rdier NOtification that trip has been started
+            kafkaTemplate.send("notification-service",new TripConfirmedEvent(trip.getRiderId(),trip.getDriverId()));
             return ResponseEntity.ok("Trip confirmed");
         }
         return ResponseEntity.status(404).body("Trip not found");
