@@ -19,9 +19,13 @@
     - name: enable ingress in minikube
       shell: minikube addons enable ingress
 
+    - name: enable metrics server for hpa
+      shell: minikube addons enable metrics-server
+
     - name: wait for ingress to start
       pause:
         seconds: 60
+    
     - name: deploy using kubectl
       shell: kubectl apply -R -f {{ deployments_dir }}
 
