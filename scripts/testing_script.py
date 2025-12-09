@@ -1,7 +1,7 @@
 import requests
 import datetime
 import time
-
+import pprint
 
 INGRESS_PORT = 80
 def register(user_name : str,user_pass : str,roles : list[str],url : str):
@@ -11,7 +11,7 @@ def register(user_name : str,user_pass : str,roles : list[str],url : str):
         "roles" : roles
     }
     response = requests.post(url=url,json=params)
-    print(f"user {user_name} : {response.text}")
+    print(f"\nuser with username : {user_name}, roles : {roles} registering\nresponse : {response.text}\n")
 
 def register_both(rider_name : str,rider_pass : str,driver_name : str,driver_pass : str,url : str):
     register(rider_name,rider_pass,["rider"],url)
@@ -24,13 +24,13 @@ def login(user_name : str,user_pass: str,role : str,url : str) -> str:
         "role" : role
     }
     response = requests.post(url=url,json=params)
-    return response.json().get("token")
+    jwt_token = response.json().get("token");
+    print(f"\nuser with username : {user_name}, role : {role} logged in\njwt : {jwt_token}\n")
+    return jwt_token
 
 def login_both(rider_name : str,rider_pass : str,driver_name : str,driver_pass : str,url : str) -> tuple[str,str]:
     rider_jwt = login(rider_name,rider_pass,"rider",url)
     driver_jwt = login(driver_name,driver_pass,"driver",url)
-    print(f"{rider_jwt=}")
-    print(f"{driver_jwt=}")
     return (rider_jwt,driver_jwt)
     
 
@@ -47,14 +47,14 @@ def register_route(jwt_token : str,starting : str,dest,seats : int,vehicle_no : 
     }
     data = requests.post(url=url,headers=headers,json=params)
     routeId = data.json()["route_id"]
-    print(f"route id : {routeId}")
+    print(f"\ndriver registered route with following parameters : \n{pprint.pformat(params)}")
+    print(f"route id : {routeId}\n")
     return routeId
 
 
 def register_arrival(jwt : str,dest : str,station : str,url : str):
     headers = {
-        "Authorization": f"Bearer {jwt}",
-        # "Content-Type": "application/json"
+        "Authorization": f"Bearer {jwt}"
     }
     time = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=4)).strftime("%Y-%m-%dT%H:%M:%S")
     params = {
@@ -63,7 +63,7 @@ def register_arrival(jwt : str,dest : str,station : str,url : str):
         "arrivalstationname" : station
     }
     data = requests.post(url=url,headers=headers,json=params)
-    print(data.text)
+    print(f"\nrider registered arraival with params : \n{pprint.pformat(params)}\nresponse : {data.text}\n")
 
 def update_loc(jwt : str,routeid : int,loc : str,url : str):
     headers = {
@@ -75,7 +75,7 @@ def update_loc(jwt : str,routeid : int,loc : str,url : str):
         "location" : loc
     }
     data = requests.patch(url=url,headers=headers,json=params)
-    print(data.text)
+    print(f"\ndriver updated location with params :\n{pprint.pformat(params)}\nresponse : {data.text}\n")
 
 def confirm_ride(jwt : str,tripid : int,arrivalid : int,url : str):
     header={
@@ -87,7 +87,7 @@ def confirm_ride(jwt : str,tripid : int,arrivalid : int,url : str):
         "arrivalId" : arrivalid
     }
     response = requests.post(url,json=param,headers=header)
-    print(response.text)
+    print(f"\ntrip confirmed with params :\n{pprint.pformat(param)}\nresponse : {response.text}\n")
 
 def main():
     rider_name = "abhinav"
