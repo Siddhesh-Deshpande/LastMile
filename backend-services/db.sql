@@ -1,25 +1,18 @@
 CREATE DATABASE lastmile_driverservice;
-
 CREATE DATABASE lastmile_riderservice;
-
 CREATE DATABASE lastmile_tripservice;
-
 CREATE DATABASE lastmile_userservice;
 
 \c lastmile_driverservice;
-
 CREATE TABLE routes (
     route_id SERIAL PRIMARY KEY,
     driver_id INTEGER NOT NULL,
     starting_location VARCHAR(255),
     destination VARCHAR(255),
-    available_seats INTEGER,
-    current_location VARCHAR(255)
+    vehicle_number VARCHAR(255)
 );
 
 \c lastmile_riderservice;
-
-
 CREATE TABLE rides (
     arrival_id SERIAL PRIMARY KEY,
     rider_id INTEGER NOT NULL,
@@ -30,7 +23,6 @@ CREATE TABLE rides (
 );
 
 \c lastmile_tripservice;
-
 CREATE TABLE trips (
     trip_id SERIAL PRIMARY KEY,
     rider_id INTEGER NOT NULL,
@@ -41,7 +33,6 @@ CREATE TABLE trips (
 );
 
 \c lastmile_userservice;
-
 CREATE TABLE users (
     driverid SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
