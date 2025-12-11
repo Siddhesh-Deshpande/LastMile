@@ -31,8 +31,7 @@ public class RegistrationController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     Integer driverid = (Integer) auth.getDetails();
     // We need to save save this route in the db and in the redis persist driver id as key and start
-    // location as value so that When the driver location updates we just update that enitty in
-    // rediss and we must also update currentlocation in db in case the entry from redis evicts
+    // location as value so that When the driver location updates we just update that enitty in redis
     Route r =
         new Route(
             driverid,
@@ -64,7 +63,8 @@ public class RegistrationController {
     Integer driverid = (Integer) auth.getDetails();
 
     Route r = routeRepository.findByRouteId(updateLocationDTO.getRoute_id());
-    routeRepository.save(r); // updated in db
+    routeRepository.save(r);
+    // seems like these two lines aren't necessary as we changed this logic
     String redisKey = "driver-service:driver:" + driverid + ":route";
     DriverDataRedis data = (DriverDataRedis) redisTemplate.opsForValue().get(redisKey);
     if (data != null) {

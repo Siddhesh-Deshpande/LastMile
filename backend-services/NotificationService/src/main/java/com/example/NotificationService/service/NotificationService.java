@@ -21,8 +21,10 @@ public class NotificationService {
 
   private final Map<Integer, SseEmitter> driverEmitters = new ConcurrentHashMap<>();
   private final Map<Integer, SseEmitter> riderEmitters = new ConcurrentHashMap<>();
+  //SSE emitters are accessed from multiple threads (Kafka listeners, HTTP requests), so thread safety is needed.
   private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
+  //add a SSE Connection
   public SseEmitter addEmitter(String role, Integer id) {
     SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
