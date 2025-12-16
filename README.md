@@ -1,7 +1,4 @@
-# Project Report
-
-International Institute of Information Technology, Bangalore  
-**LastMile Project Report**  
+# Project Overview
 Team Members: Abhinav Kumar (IMT2022079), Siddhesh Deshpande (IMT2022080)
 ---
 
@@ -551,5 +548,5 @@ This project falls under the domain of **Real-Time Distributed Systems** and **B
   https://github.com/Abhinav-Kumar012/lastmile_microservice
 - **HPA Autoscaling Demonstration (Asciinema):**  
   https://asciinema.org/a/sXupGyJNLkK6Tfvh75dtue4wZ
-  
+
 [![asciicast](https://asciinema.org/a/sXupGyJNLkK6Tfvh75dtue4wZ.svg)](https://asciinema.org/a/sXupGyJNLkK6Tfvh75dtue4wZ)
